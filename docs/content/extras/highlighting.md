@@ -16,37 +16,37 @@ ways &mdash; either pre-processed server side from your content, or to defer
 the processing to the client side, using a JavaScript library. The advantage of
 server side is that it doesn’t depend on a JavaScript library and consequently
 works very well when read from an RSS feed. The advantage of client side is that
-it doesn’t cost anything when building your site and some of the highlighting 
+it doesn’t cost anything when building your site and some of the highlighting
 scripts available cover more languages than Pygments does.
-
-For the pre-processed approach, Highlighting is performed by an external
-Python-based program called [Pygments](http://pygments.org) and is triggered
-via an embedded shortcode. If Pygments is absent from the path, it will
-silently simply pass the content along unhighlighted.
 
 ## Server-side
 
-### Disclaimers
+For the pre-processed approach, Highlighting is performed by an external
+Python-based program called [Pygments](http://pygments.org/) and is triggered
+via an embedded shortcode (see example below). If Pygments is absent from the path, it will silently simply pass the content along unhighlighted.
 
- * **Warning:** Pygments is relatively slow. Expect much longer build times when using server-side highlighting.
- * Languages available depends on your Pygments installation.
- * Styles are inline in order to be supported in syndicated content when references
-to style sheets are not carried over.
- * We have sought to have the simplest interface possible, which consequently
-limits configuration. An ambitious user is encouraged to extend the current
-functionality to offer more customization.
-* You can change appearance with config options `pygmentsstyle`(default
-`"monokai"`) and `pygmentsuseclasses`(defaut `false`).
+### Pygments
+
+If you have never worked with Pygments before, here is a brief primer.
+
++ Install Python from [python.org](https://www.python.org/downloads/). Version 2.7.x is already sufficient.
++ Run `pip install Pygments` in order to install Pygments. Once installed, Pygments gives you a command `pygmentize`. Make sure it sits in your PATH, otherwise Hugo cannot find it.
+
+On Debian and Ubuntu systems, you may also install Pygments by running `sudo apt-get install python3-pygments`.
+
+Hugo gives you two options that you can set with the variable `pygmentsuseclasses` (default `false`) in `config.toml` (or `config.yaml`).
+
+1. Color-codes for highlighting keywords are directly inserted if `pygmentsuseclasses = false` (default). See in the example below. The color-codes depend on your choice of the `pygmentsstyle` (default `"monokai"`). You can explore the different color styles on [pygments.org](http://pygments.org/) after inserting some example code.
+2. If you choose `pygmentsuseclasses = true`, Hugo includes class names in your code instead of color-codes. For class-names to be meaningful, you need to include a `.css`-file in your website representing your color-scheme. You can either generate this `.css`-files according to this [description](http://pygments.org/docs/cmdline/) or download the standard ones from the [GitHub pygments-css repository](https://github.com/richleland/pygments-css).
 
 ### Usage
-Highlight takes exactly one required parameter of language and requires a
+Highlighting is carried out via the in-built shortcode `highlight`. `highlight` takes exactly one required parameter of language and requires a
 closing shortcode.
 
 ### Example
-Since this example is a code block, we use Github flavored Markdown's code fences, ```, to delimit the code. If you are using standard Markdown, instead of the code fence delimiters, each line must be preceeded by 4 spaces to identify each line as a line of code. Not doing either will result in the text being rendered as HTML. This will prevent Pygment highlighting from working.
- 
-```  
-{{%/* highlight html */%}}
+
+```
+{{</* highlight html */>}}
 <section id="main">
   <div>
     <h1 id="title">{{ .Title }}</h1>
@@ -55,7 +55,7 @@ Since this example is a code block, we use Github flavored Markdown's code fence
     {{ end }}
   </div>
 </section>
-{{%/* /highlight */%}}
+{{</* /highlight */>}}
 ```
 
 ### Example Output
@@ -68,6 +68,29 @@ Since this example is a code block, we use Github flavored Markdown's code fence
         {{ end }}
       <span style="color: #f92672">&lt;/div&gt;</span>
     <span style="color: #f92672">&lt;/section&gt;</span>
+
+### Options
+
+Options to control highlighting can be added as a quoted, comma separated key-value list as the second argument in the shortcode. The example below will highlight as language `go` with inline line numbers, with line number 2 and 3 highlighted.
+
+```
+{{</* highlight go "linenos=inline,hl_lines=2 3" */>}}
+var a string
+var b string
+var c string
+var d string
+{{</* / highlight */>}}
+```
+
+Supported keywords:  `style`, `encoding`, `noclasses`, `hl_lines`, `linenos`. Note that `style` and `noclasses` will override the similar setting in the global config.
+
+The keywords are the same you would using with Pygments from the command line, see the [Pygments doc](http://pygments.org/docs/) for more info.
+
+
+### Disclaimers
+
+ * Pygments is relatively slow, but Hugo will cache the results to disk.
+ * Languages available depends on your Pygments installation.
 
 ## Client-side
 
